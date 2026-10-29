@@ -1,0 +1,72 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Áttekintés";
+}
+
+<section class="hero-panel">
+    <div>
+        <span class="eyebrow">MŰHELYI ÁTTEKINTÉS</span>
+        <h1>Jó napot! <span class="accent-text">Minden egy helyen.</span></h1>
+        <p>Kövesd az ügyfeleket és a javításokat egyetlen, átlátható felületen.</p>
+        <a class="btn btn-primary btn-lg" asp-page="/Repairs/Index">Javítások megnyitása <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="hero-mark" aria-hidden="true">05</div>
+</section>
+
+<section class="stats-grid" aria-label="Műhely összesítő">
+    <article class="stat-card">
+        <span class="stat-icon">◎</span>
+        <span class="stat-label">Ügyfél</span>
+        <strong>@Model.CustomerCount</strong>
+        <a asp-page="/Customers/Index">Ügyfelek megtekintése <span aria-hidden="true">→</span></a>
+    </article>
+    <article class="stat-card">
+        <span class="stat-icon">◷</span>
+        <span class="stat-label">Nyitott javítás</span>
+        <strong>@Model.OpenRepairCount</strong>
+        <a asp-page="/Repairs/Index">Munkalista megtekintése <span aria-hidden="true">→</span></a>
+    </article>
+    <article class="stat-card">
+        <span class="stat-icon">✓</span>
+        <span class="stat-label">Lezárt javítás</span>
+        <strong>@Model.CompletedRepairCount</strong>
+        <span class="stat-footnote">Rögzített munkák</span>
+    </article>
+</section>
+
+<section class="content-panel">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">LEGUTÓBBI MUNKÁK</span>
+            <h2>Friss javítások</h2>
+        </div>
+        <a class="text-link" asp-page="/Repairs/Index">Összes javítás <span aria-hidden="true">→</span></a>
+    </div>
+    @if (Model.RecentRepairs.Count == 0)
+    {
+        <p class="empty-state">Még nincs rögzített javítás.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table workshop-table align-middle mb-0">
+                <thead>
+                <tr><th>JÁRMŰ</th><th>ÜGYFÉL</th><th>FELVÉVE</th><th>ÁLLAPOT</th><th class="text-end">KÖLTSÉG</th></tr>
+                </thead>
+                <tbody>
+                @foreach (var repair in Model.RecentRepairs)
+                {
+                    <tr>
+                        <td><strong>@repair.Vehicle</strong><span class="table-subtext">@repair.LicensePlate</span></td>
+                        <td>@repair.Customer.Name</td>
+                        <td>@repair.CreatedAt.ToLocalTime().ToString("yyyy. MMM d.")</td>
+                        <td><span class="status-badge status-@repair.Status.ToString().ToLowerInvariant()">@repair.StatusName</span></td>
+                        <td class="text-end">@(repair.Cost.HasValue ? $"{repair.Cost.Value:N0} Ft" : "—")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

@@ -1,0 +1,29 @@
+@page
+@using otoszerelo.Models
+@model otoszerelo.Pages.Repairs.EditModel
+@{
+    ViewData["Title"] = "Javítás szerkesztése";
+}
+
+<div class="page-heading">
+    <div><span class="eyebrow">MUNKALAP #@Model.Repair.Id</span><h1>Javítás szerkesztése</h1><p>Módosítsd a jármű, az ügyfél vagy a javítás adatait.</p></div>
+    <a class="btn btn-outline-secondary" asp-page="Index">← Vissza a javításokhoz</a>
+</div>
+<section class="content-panel form-panel">
+    <form method="post">
+        <input type="hidden" asp-for="Repair.Id" />
+        <input type="hidden" asp-for="Repair.CreatedAt" />
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+        <div class="form-grid">
+            <div class="field-group"><label asp-for="Repair.CustomerId"></label><select asp-for="Repair.CustomerId" class="form-select"><option value="">Válassz ügyfelet</option>@foreach (var customer in Model.Customers) { <option value="@customer.Id">@customer.Name</option> }</select><span asp-validation-for="Repair.CustomerId" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="Repair.LicensePlate"></label><input asp-for="Repair.LicensePlate" class="form-control" pattern="[A-Za-z]{3}-[0-9]{3}" /><span asp-validation-for="Repair.LicensePlate" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="Repair.Vehicle"></label><input asp-for="Repair.Vehicle" class="form-control" /><span asp-validation-for="Repair.Vehicle" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="Repair.Status"></label><select asp-for="Repair.Status" asp-items="Html.GetEnumSelectList<RepairStatus>()" class="form-select"></select><span asp-validation-for="Repair.Status" class="field-error"></span></div>
+            <div class="field-group full-width"><label asp-for="Repair.Description"></label><textarea asp-for="Repair.Description" class="form-control" rows="3"></textarea><span asp-validation-for="Repair.Description" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="Repair.Cost"></label><div class="input-group"><input asp-for="Repair.Cost" class="form-control" /><span class="input-group-text">Ft</span></div><span asp-validation-for="Repair.Cost" class="field-error"></span></div>
+        </div>
+        <div class="form-actions"><a class="btn btn-outline-secondary" asp-page="Index">Mégse</a><button type="submit" class="btn btn-primary">Változtatások mentése</button></div>
+    </form>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

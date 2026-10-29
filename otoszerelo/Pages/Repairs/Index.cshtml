@@ -1,0 +1,96 @@
+@page
+@using otoszerelo.Models
+@model otoszerelo.Pages.Repairs.IndexModel
+@{
+    ViewData["Title"] = "Javítások";
+}
+
+<div class="page-heading">
+    <div><span class="eyebrow">MUNKALAPOK</span><h1>Javítások</h1><p>Kövesd a műhelyben folyó munkákat, és szűrj állapot szerint.</p></div>
+    <a class="btn btn-primary" href="#new-repair">＋ Új javítás</a>
+</div>
+
+<section class="content-panel filter-panel">
+    <form method="get" class="filter-form">
+        <label for="status-filter">Szűrés állapot szerint</label>
+        <select id="status-filter" name="status" class="form-select">
+            <option value="">Minden állapot</option>
+            <option value="Received" selected="@(Model.StatusFilter == "Received")">Felvéve</option>
+            <option value="InProgress" selected="@(Model.StatusFilter == "InProgress")">Folyamatban</option>
+            <option value="Completed" selected="@(Model.StatusFilter == "Completed")">Kész</option>
+        </select>
+        <button class="btn btn-outline-secondary" type="submit">Szűrés</button>
+        @if (Model.StatusFilter is not null)
+        {
+            <a class="text-link" asp-page="Index">Szűrő törlése</a>
+        }
+    </form>
+</section>
+
+<section class="content-panel">
+    <div class="section-heading compact-heading"><h2>Munkalista <span class="count-pill">@Model.Repairs.Count</span></h2></div>
+    @if (Model.Repairs.Count == 0)
+    {
+        <p class="empty-state">Nincs a szűrésnek megfelelő javítás.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table workshop-table align-middle mb-0">
+                <thead><tr><th>JÁRMŰ / JAVÍTÁS</th><th>ÜGYFÉL</th><th>FELVÉVE</th><th>ÁLLAPOT</th><th class="text-end">KÖLTSÉG</th><th class="text-end">MŰVELETEK</th></tr></thead>
+                <tbody>
+                @foreach (var repair in Model.Repairs)
+                {
+                    <tr>
+                        <td><strong>@repair.Vehicle</strong><span class="table-subtext">@repair.LicensePlate · @repair.Description</span></td>
+                        <td><a class="customer-name" asp-page="/Customers/Details" asp-route-id="@repair.CustomerId">@repair.Customer.Name</a></td>
+                        <td>@repair.CreatedAt.ToLocalTime().ToString("yyyy. MMM d.")</td>
+                        <td>
+                            <form method="post" asp-page-handler="Status" class="status-form">
+                                <input type="hidden" name="id" value="@repair.Id" />
+                                <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                                <select name="status" class="form-select form-select-sm" aria-label="Állapot: @repair.Vehicle" onchange="this.form.submit()">
+                                    <option value="Received" selected="@(repair.Status == RepairStatus.Received)">Felvéve</option>
+                                    <option value="InProgress" selected="@(repair.Status == RepairStatus.InProgress)">Folyamatban</option>
+                                    <option value="Completed" selected="@(repair.Status == RepairStatus.Completed)">Kész</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td class="text-end">@(repair.Cost.HasValue ? $"{repair.Cost.Value:N0} Ft" : "—")</td>
+                        <td class="text-end action-cell">
+                            <a class="btn btn-sm btn-outline-secondary" asp-page="Edit" asp-route-id="@repair.Id">Szerkesztés</a>
+                            <form method="post" asp-page-handler="Delete" class="d-inline" onsubmit="return confirm('Biztosan törlöd ezt a javítást?');">
+                                <input type="hidden" name="id" value="@repair.Id" />
+                                <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Törlés</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="content-panel form-panel" id="new-repair">
+    <div class="section-heading compact-heading"><div><span class="eyebrow">ÚJ MUNKALAP</span><h2>Javítás felvétele</h2></div></div>
+    <form method="post" asp-page-handler="Create">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+        <div class="form-grid">
+            <div class="field-group"><label asp-for="NewCustomer.Name"></label><input asp-for="NewCustomer.Name" class="form-control" autocomplete="name" /><span asp-validation-for="NewCustomer.Name" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="NewCustomer.Phone"></label><input asp-for="NewCustomer.Phone" class="form-control" autocomplete="tel" /><span asp-validation-for="NewCustomer.Phone" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="NewCustomer.Email"></label><input asp-for="NewCustomer.Email" class="form-control" autocomplete="email" /><span asp-validation-for="NewCustomer.Email" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="Repair.LicensePlate"></label><input asp-for="Repair.LicensePlate" class="form-control" placeholder="ABC-123" pattern="[A-Za-z]{3}-[0-9]{3}" /><span asp-validation-for="Repair.LicensePlate" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="Repair.Vehicle"></label><input asp-for="Repair.Vehicle" class="form-control" placeholder="Pl. Toyota Corolla" /><span asp-validation-for="Repair.Vehicle" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="Repair.Status"></label><select asp-for="Repair.Status" asp-items="Html.GetEnumSelectList<RepairStatus>()" class="form-select"></select><span asp-validation-for="Repair.Status" class="field-error"></span></div>
+            <div class="field-group full-width"><label asp-for="Repair.Description"></label><textarea asp-for="Repair.Description" class="form-control" rows="2"></textarea><span asp-validation-for="Repair.Description" class="field-error"></span></div>
+            <div class="field-group"><label asp-for="Repair.Cost"></label><div class="input-group"><input asp-for="Repair.Cost" class="form-control" placeholder="Opcionális" /><span class="input-group-text">Ft</span></div><span asp-validation-for="Repair.Cost" class="field-error"></span></div>
+        </div>
+        <div class="form-actions"><button type="submit" class="btn btn-primary">Javítás rögzítése</button></div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

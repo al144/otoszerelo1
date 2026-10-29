@@ -1,0 +1,50 @@
+@page
+@model otoszerelo.Pages.Customers.IndexModel
+@{
+    ViewData["Title"] = "Ügyfelek";
+}
+
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">ÜGYFÉLKEZELÉS</span>
+        <h1>Ügyfelek</h1>
+        <p>Az ügyfelek adatai és a hozzájuk tartozó javítások.</p>
+    </div>
+    <a class="btn btn-primary" asp-page="Create">＋ Új ügyfél</a>
+</div>
+
+<section class="content-panel">
+    <div class="section-heading compact-heading">
+        <h2>Ügyféllista <span class="count-pill">@Model.Customers.Count</span></h2>
+    </div>
+    @if (Model.Customers.Count == 0)
+    {
+        <p class="empty-state">Még nincs ügyfél. Hozd létre az első ügyfelet!</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table workshop-table align-middle mb-0">
+                <thead><tr><th>ÜGYFÉL</th><th>TELEFON</th><th>E-MAIL</th><th>JAVÍTÁSOK</th><th class="text-end">MŰVELETEK</th></tr></thead>
+                <tbody>
+                @foreach (var customer in Model.Customers)
+                {
+                    <tr>
+                        <td><a class="customer-name" asp-page="Details" asp-route-id="@customer.Id">@customer.Name</a></td>
+                        <td>@(customer.Phone ?? "—")</td>
+                        <td>@(customer.Email ?? "—")</td>
+                        <td><span class="count-pill">@customer.Repairs.Count</span></td>
+                        <td class="text-end action-cell">
+                            <a class="btn btn-sm btn-outline-secondary" asp-page="Edit" asp-route-id="@customer.Id">Szerkesztés</a>
+                            <form method="post" asp-page-handler="Delete" class="d-inline" onsubmit="return confirm('Biztosan törlöd ezt az ügyfelet?');">
+                                <input type="hidden" name="id" value="@customer.Id" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Törlés</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
